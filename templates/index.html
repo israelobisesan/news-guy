@@ -4,94 +4,290 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Smart News Feed</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f0f2f5;
+      --surface: rgba(255,255,255,0.85);
+      --surface-border: rgba(255,255,255,0.3);
+      --text: #1a1a2e;
+      --text-secondary: #555;
+      --primary: #6c63ff;
+      --primary-hover: #5a52d5;
+      --primary-glow: rgba(108,99,255,0.3);
+      --card-bg: rgba(255,255,255,0.75);
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      --navbar-bg: rgba(255,255,255,0.7);
+      --input-bg: rgba(255,255,255,0.8);
+      --divider: rgba(0,0,0,0.06);
+      --badge-bg: rgba(108,99,255,0.12);
+      --badge-color: #6c63ff;
+      --hover-bg: rgba(108,99,255,0.08);
+      --scrollbar-thumb: rgba(108,99,255,0.3);
+      --scrollbar-track: transparent;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f0f1a;
+      --surface: rgba(30,30,50,0.85);
+      --surface-border: rgba(255,255,255,0.08);
+      --text: #e8e8f0;
+      --text-secondary: #999;
+      --primary: #8b83ff;
+      --primary-hover: #a09aff;
+      --primary-glow: rgba(139,131,255,0.25);
+      --card-bg: rgba(30,30,50,0.7);
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      --navbar-bg: rgba(15,15,26,0.8);
+      --input-bg: rgba(40,40,65,0.8);
+      --divider: rgba(255,255,255,0.06);
+      --badge-bg: rgba(139,131,255,0.15);
+      --badge-color: #8b83ff;
+      --hover-bg: rgba(139,131,255,0.1);
+      --scrollbar-thumb: rgba(139,131,255,0.3);
+      --scrollbar-track: transparent;
+    }
+
+    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+
+    /* Animated background */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 20s ease-in-out infinite;
+    }
+    .bg-orb:nth-child(1) { width: 600px; height: 600px; background: #6c63ff; top: -200px; left: -200px; animation-delay: 0s; }
+    .bg-orb:nth-child(2) { width: 500px; height: 500px; background: #ff6b9d; bottom: -150px; right: -150px; animation-delay: -7s; }
+    .bg-orb:nth-child(3) { width: 400px; height: 400px; background: #00d4aa; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -14s; }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(80px, -60px) scale(1.1); }
+      66% { transform: translate(-60px, 40px) scale(0.9); }
     }
 
     /* Navbar */
     .navbar {
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: 60px;
+      height: 68px;
+      background: var(--navbar-bg);
+      backdrop-filter: blur(20px) saturate(1.8);
+      -webkit-backdrop-filter: blur(20px) saturate(1.8);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
       z-index: 100;
+      transition: background 0.4s ease, border-color 0.4s ease;
     }
+
     .navbar .logo {
-      font-weight: bold;
-      font-size: 18px;
-      color: #1877f2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 20px;
+      background: linear-gradient(135deg, #6c63ff, #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
     }
+
+    .navbar .logo i { font-size: 22px; }
+
     .navbar .search {
       flex: 1;
       display: flex;
       justify-content: center;
+      max-width: 520px;
+      margin: 0 20px;
     }
+
+    .navbar .search-wrapper {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      background: var(--input-bg);
+      border-radius: 50px;
+      border: 1px solid var(--surface-border);
+      transition: all 0.3s ease, background 0.4s ease, border-color 0.4s ease;
+      padding: 0 4px 0 16px;
+    }
+
+    .navbar .search-wrapper:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+
+    .navbar .search-wrapper i {
+      color: var(--text-secondary);
+      font-size: 14px;
+      transition: color 0.4s ease;
+    }
+
     .navbar input {
-      width: 350px;
-      padding: 8px 12px;
-      border-radius: 20px;
-      border: 1px solid #ddd;
-      outline: none;
-    }
-    .navbar button {
-      margin-left: 8px;
-      padding: 6px 14px;
+      flex: 1;
+      padding: 10px 12px;
       border: none;
-      border-radius: 20px;
-      background: #1877f2;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      transition: color 0.4s ease;
+    }
+
+    .navbar input::placeholder { color: var(--text-secondary); }
+
+    .navbar .search-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #6c63ff, #5a52d5);
       color: white;
       cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      margin: 3px;
     }
-    .navbar button:hover {
-      background: #145dbf;
+
+    .navbar .search-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--primary-glow);
     }
-    .navbar .icons {
+
+    .navbar .search-btn:active { transform: translateY(0); }
+
+    .navbar .actions {
       display: flex;
-      gap: 15px;
+      align-items: center;
+      gap: 12px;
     }
-    .navbar .icon {
-      font-size: 20px;
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      color: var(--text);
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.3s ease, background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: rotate(15deg);
     }
 
     /* Layout */
     .layout {
       display: grid;
-      grid-template-columns: 220px 1fr 300px;
-      gap: 20px;
-      padding: 80px 20px 20px; /* top padding = navbar height + spacing */
-      flex: 1;
-      overflow: hidden;
+      grid-template-columns: 240px 1fr 300px;
+      gap: 24px;
+      padding: 92px 28px 28px;
+      max-width: 1440px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
     }
 
     /* Sidebar */
     .sidebar {
+      position: sticky;
+      top: 92px;
+      height: calc(100vh - 110px);
       overflow-y: auto;
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 16px;
+      border: 1px solid var(--surface-border);
+      padding: 16px;
+      transition: background 0.4s ease, border-color 0.4s ease;
     }
+
+    .sidebar .sidebar-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 12px;
+      padding-left: 8px;
+      transition: color 0.4s ease;
+    }
+
     .sidebar ul {
       list-style: none;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
+
     .sidebar li {
-      padding: 10px;
+      padding: 11px 14px;
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
     }
+
+    .sidebar li i {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
     .sidebar li:hover {
-      background: #e4e6eb;
+      background: var(--hover-bg);
+      color: var(--text);
+    }
+
+    .sidebar li.active {
+      background: var(--badge-bg);
+      color: var(--badge-color);
+      font-weight: 600;
     }
 
     /* Feed */
@@ -100,168 +296,700 @@
       flex-direction: column;
       gap: 20px;
       overflow-y: auto;
-      padding-right: 10px;
+      padding-right: 4px;
+      max-height: calc(100vh - 110px);
     }
+
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .feed-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .feed-header .count {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: color 0.4s ease;
+    }
+
+    /* Post card */
     .post {
-      background: #fff;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--card-shadow);
+      transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      animation: fadeInUp 0.5s ease backwards;
     }
+
+    .post:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+      border-color: var(--surface-border);
+    }
+
+    [data-theme="dark"] .post:hover {
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .post .post-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--badge-bg);
+      color: var(--badge-color);
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
     .post h3 {
       margin: 0 0 8px;
-      font-size: 16px;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--text);
+      transition: color 0.4s ease;
     }
+
     .post p {
-      margin: 0 0 10px;
+      margin: 0 0 12px;
       font-size: 14px;
-      color: #444;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      transition: color 0.4s ease;
     }
+
     .post img {
       width: 100%;
-      max-height: 250px;
+      max-height: 280px;
       object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      transition: transform 0.4s ease;
     }
-    .post a {
+
+    .post:hover img { transform: scale(1.01); }
+
+    .post .post-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      border-top: 1px solid var(--divider);
+      transition: border-color 0.4s ease;
+    }
+
+    .post .post-actions {
+      display: flex;
+      gap: 16px;
+    }
+
+    .post .post-actions button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: all 0.2s ease, color 0.4s ease;
+    }
+
+    .post .post-actions button:hover {
+      background: var(--hover-bg);
+      color: var(--primary);
+    }
+
+    .post .post-actions button.liked {
+      color: #ff6b9d;
+    }
+
+    .post .post-link {
       text-decoration: none;
-      color: #1877f2;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    .post .post-link:hover {
+      background: var(--badge-bg);
+      gap: 10px;
     }
 
     /* Rightbar */
     .rightbar {
-      overflow-y: auto;
-    }
-    .rightbar .card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .rightbar h4 {
-      margin-top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    /* Loading spinner */
+    .rightbar .card {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--surface-border);
+      transition: all 0.3s ease, background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .rightbar .card:hover {
+      border-color: var(--surface-border);
+    }
+
+    .rightbar .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .rightbar .card-header i {
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .rightbar h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      transition: color 0.4s ease;
+    }
+
+    .rightbar p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      transition: color 0.4s ease;
+    }
+
+    .rightbar .ad-timer {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.4s ease;
+    }
+    .rightbar .ad-timer i { font-size: 10px; }
+
+    .rightbar .ad-slider {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--divider);
+    }
+
+    .rightbar .ad-slider img {
+      width: 100%;
+      display: block;
+      border-radius: 10px;
+      transition: opacity 0.6s ease;
+    }
+
+    .rightbar .ad-slider .ad-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), #ff6b9d);
+      border-radius: 0 2px 0 0;
+      transition: width 0.1s linear;
+    }
+
+    .rightbar .trending-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--divider);
+      transition: border-color 0.4s ease;
+      cursor: pointer;
+    }
+
+    .rightbar .trending-item:last-child { border-bottom: none; }
+
+    .rightbar .trending-item .trend-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--divider);
+      width: 28px;
+      transition: color 0.4s ease;
+    }
+
+    .rightbar .trending-item .trend-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      transition: color 0.4s ease;
+    }
+
+    .rightbar .trending-item:hover .trend-text { color: var(--primary); }
+
+    /* Loading */
     .loading {
       text-align: center;
-      padding: 20px;
+      padding: 40px 20px;
+      color: var(--text-secondary);
       font-size: 14px;
-      color: #555;
+      transition: color 0.4s ease;
+    }
+
+    .loading .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--divider);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Skeleton loader */
+    .skeleton {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--surface-border);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton .sk-title { height: 20px; background: var(--divider); border-radius: 6px; margin-bottom: 10px; width: 70%; }
+    .skeleton .sk-text { height: 14px; background: var(--divider); border-radius: 6px; margin-bottom: 8px; width: 100%; }
+    .skeleton .sk-text:last-child { width: 60%; }
+    .skeleton .sk-img { height: 180px; background: var(--divider); border-radius: 10px; margin-bottom: 10px; }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 200;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.4s ease, border-color 0.4s ease;
+      color: var(--text);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast i { color: var(--primary); font-size: 18px; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; padding: 88px 16px 16px; gap: 16px; }
+      .sidebar { display: none; }
+      .rightbar { display: none; }
+      .feed { max-height: none; padding-right: 0; }
+      .navbar { padding: 0 16px; }
+      .navbar .search { max-width: 100%; margin: 0 12px; }
+    }
+
+    @media (max-width: 600px) {
+      .navbar .logo span { display: none; }
+      .navbar input { font-size: 13px; }
+      .navbar .search-btn { padding: 8px 14px; font-size: 13px; }
+      .post h3 { font-size: 15px; }
     }
   </style>
 </head>
 <body>
-  <!-- Top Nav -->
-  <div class="navbar">
-    <div class="logo">🌐 Smart News</div>
-    <div class="search">
-      <input type="text" id="searchInput" placeholder="Search news..."/>
-      <button onclick="startNewSearch()">Search</button>
-    </div>
-  </div>
+  <!-- Animated Orbs -->
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
 
-  <!-- Page Layout -->
+  <!-- Toast -->
+  <div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Liked!</span></div>
+
+  <!-- Top Nav -->
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-newspaper"></i>
+      <span>SmartNews</span>
+    </div>
+    <div class="search">
+      <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search news..." />
+        <button class="search-btn" onclick="startNewSearch()">Search</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Layout -->
   <div class="layout">
     <!-- Left Sidebar -->
-    <div class="sidebar">
+    <aside class="sidebar">
+      <div class="sidebar-label">Categories</div>
       <ul>
-        <li onclick="startNewSearch('top')">Home</li>
-        <li onclick="startNewSearch('world')">World News</li>
-        <li onclick="startNewSearch('technology')">Technology</li>
-        <li onclick="startNewSearch('sports')">Sports</li>
-        <li onclick="startNewSearch('business')">Business</li>
-        <li onclick="startNewSearch('health')">Health</li>
-        <li onclick="startNewSearch('entertainment')">Entertainment</li>
+        <li class="active" data-category="top" onclick="selectCategory(this, 'top')">
+          <i class="fas fa-home"></i> Home
+        </li>
+        <li data-category="world" onclick="selectCategory(this, 'world')">
+          <i class="fas fa-globe"></i> World News
+        </li>
+        <li data-category="technology" onclick="selectCategory(this, 'technology')">
+          <i class="fas fa-microchip"></i> Technology
+        </li>
+        <li data-category="sports" onclick="selectCategory(this, 'sports')">
+          <i class="fas fa-running"></i> Sports
+        </li>
+        <li data-category="business" onclick="selectCategory(this, 'business')">
+          <i class="fas fa-chart-line"></i> Business
+        </li>
+        <li data-category="health" onclick="selectCategory(this, 'health')">
+          <i class="fas fa-heartbeat"></i> Health
+        </li>
+        <li data-category="entertainment" onclick="selectCategory(this, 'entertainment')">
+          <i class="fas fa-film"></i> Entertainment
+        </li>
       </ul>
-    </div>
+    </aside>
 
     <!-- Feed -->
-    <div class="feed" id="newsFeed"></div>
+    <main class="feed" id="newsFeed">
+      <div class="feed-header">
+        <h2 id="feedTitle">Technology</h2>
+        <span class="count" id="articleCount"></span>
+      </div>
+    </main>
 
     <!-- Right Sidebar -->
-    <div class="rightbar">
-      <div class="card">
-        <img src="https://via.placeholder.com/280x100?text=Ad+Banner" alt="Ad Banner" style="width:100%; border-radius:8px;"/>
+    <aside class="rightbar">
+      <div class="card ad-card">
+        <div class="card-header">
+          <i class="fas fa-ad"></i>
+          <h4>Advertisement</h4>
+          <span class="ad-timer" id="adTimer"><i class="fas fa-sync-alt"></i> <span id="adCountdown">8</span>s</span>
+        </div>
+        <div class="ad-slider" id="adSlider">
+          <a id="adLink" href="#" target="_blank" rel="noopener">
+            <img id="adImage" src="" alt="Advertisement" />
+          </a>
+          <div class="ad-progress" id="adProgress"></div>
+        </div>
       </div>
       <div class="card">
-        <h4>Birthdays</h4>
-        <p>Mike Johnson has a birthday today 🎉</p>
+        <div class="card-header">
+          <i class="fas fa-gift"></i>
+          <h4>Birthdays</h4>
+        </div>
+        <p><i class="fas fa-birthday-cake" style="color: #ff6b9d; margin-right: 6px;"></i> Mike Johnson has a birthday today!</p>
       </div>
-    </div>
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-fire"></i>
+          <h4>Trending Now</h4>
+        </div>
+        <div class="trending-item">
+          <span class="trend-num">01</span>
+          <span class="trend-text">AI breakthroughs in 2025</span>
+        </div>
+        <div class="trending-item">
+          <span class="trend-num">02</span>
+          <span class="trend-text">Global climate summit</span>
+        </div>
+        <div class="trending-item">
+          <span class="trend-num">03</span>
+          <span class="trend-text">Electric vehicle surge</span>
+        </div>
+        <div class="trending-item">
+          <span class="trend-num">04</span>
+          <span class="trend-text">Space exploration news</span>
+        </div>
+        <div class="trending-item">
+          <span class="trend-num">05</span>
+          <span class="trend-text">Cybersecurity updates</span>
+        </div>
+      </div>
+    </aside>
   </div>
 
   <script>
     let page = 1;
     let currentQuery = "technology";
     let loading = false;
+    let articleCount = 0;
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.querySelector('#themeToggle i');
+      if (html.getAttribute('data-theme') === 'dark') {
+        html.removeAttribute('data-theme');
+        icon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        icon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.querySelector('#themeToggle i').className = 'fas fa-sun';
+    }
+
+    function selectCategory(el, category) {
+      document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('feedTitle').textContent = el.textContent.trim();
+      startNewSearch(category);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toast._hide);
+      toast._hide = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function addSkeletons(count = 3) {
+      const feed = document.getElementById('newsFeed');
+      for (let i = 0; i < count; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'skeleton';
+        sk.innerHTML = '<div class="sk-img"></div><div class="sk-title"></div><div class="sk-text"></div><div class="sk-text"></div>';
+        sk.id = 'skeleton-' + i;
+        feed.appendChild(sk);
+      }
+    }
+
+    function removeSkeletons() {
+      document.querySelectorAll('.skeleton').forEach(el => el.remove());
+    }
 
     async function fetchNews(query, reset = false) {
       if (loading) return;
       loading = true;
 
       if (reset) {
-        document.getElementById("newsFeed").innerHTML = "";
+        const feed = document.getElementById('newsFeed');
+        feed.innerHTML = '<div class="feed-header"><h2 id="feedTitle">' + (document.getElementById('feedTitle')?.textContent || 'Technology') + '</h2><span class="count" id="articleCount"></span></div>';
         page = 1;
+        articleCount = 0;
+        addSkeletons(3);
       }
 
-      const feed = document.getElementById("newsFeed");
-      const loader = document.createElement("div");
-      loader.className = "loading";
-      loader.innerText = "Loading...";
-      feed.appendChild(loader);
+      const feed = document.getElementById('newsFeed');
 
       try {
         const res = await fetch(`/api/news?q=${query}&page=${page}`);
         const data = await res.json();
 
-        feed.removeChild(loader);
+        if (reset) removeSkeletons();
 
         if (data.results && data.results.length > 0) {
-          data.results.forEach(article => {
-            const post = document.createElement("div");
-            post.className = "post";
+          data.results.forEach((article, index) => {
+            articleCount++;
+            const post = document.createElement('div');
+            post.className = 'post';
+            post.style.animationDelay = (index * 0.07) + 's';
+            const tag = query || 'news';
             post.innerHTML = `
-              <h3>${article.title || "No title"}</h3>
-              ${article.image_url ? `<img src="${article.image_url}" alt="news image"/>` : ""}
-              <p>${article.description || ""}</p>
-              <a href="${article.link}" target="_blank">Read more</a>
+              <span class="post-tag"><i class="fas fa-tag"></i> ${tag}</span>
+              <h3>${article.title || 'No title'}</h3>
+              ${article.image_url ? `<img src="${article.image_url}" alt="news image" loading="lazy"/>` : ''}
+              <p>${article.description || ''}</p>
+              <div class="post-footer">
+                <div class="post-actions">
+                  <button onclick="likeArticle(this, '${article.article_id || index}')">
+                    <i class="far fa-heart"></i> <span>Like</span>
+                  </button>
+                  <button onclick="showToast('Comments coming soon!')">
+                    <i class="far fa-comment"></i> <span>Comment</span>
+                  </button>
+                  <button onclick="showToast('Share link copied!')">
+                    <i class="far fa-share-square"></i> <span>Share</span>
+                  </button>
+                </div>
+                <a href="${article.link}" target="_blank" class="post-link">
+                  Read More <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
             `;
             feed.appendChild(post);
           });
           page++;
+          document.getElementById('articleCount').textContent = articleCount + ' articles';
         } else {
-          const endMsg = document.createElement("div");
-          endMsg.className = "loading";
-          endMsg.innerText = "No more news available.";
-          feed.appendChild(endMsg);
+          if (!reset) {
+            const endMsg = document.createElement('div');
+            endMsg.className = 'loading';
+            endMsg.innerHTML = '<i class="fas fa-check-circle" style="color: var(--primary); font-size: 24px; display: block; margin-bottom: 8px;"></i> You\'ve seen it all!';
+            feed.appendChild(endMsg);
+          } else {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'loading';
+            emptyMsg.innerHTML = '<i class="fas fa-search" style="font-size: 40px; color: var(--text-secondary); display: block; margin-bottom: 12px;"></i> No news found for "' + query + '"';
+            feed.appendChild(emptyMsg);
+          }
         }
       } catch (err) {
         console.error(err);
-        feed.innerHTML += "<p>Error fetching news.</p>";
+        if (reset) removeSkeletons();
+        const errMsg = document.createElement('div');
+        errMsg.className = 'loading';
+        errMsg.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ff6b6b; font-size: 28px; display: block; margin-bottom: 8px;"></i> Oops! Something went wrong.';
+        feed.appendChild(errMsg);
       }
 
       loading = false;
     }
 
-    // Start a fresh search (resets page & clears feed)
     function startNewSearch(query) {
-      currentQuery = query || document.getElementById("searchInput").value || "technology";
+      currentQuery = query || document.getElementById('searchInput').value || 'technology';
       fetchNews(currentQuery, true);
     }
 
-    // Infinite scroll listener
-    document.getElementById("newsFeed").addEventListener("scroll", function() {
-      if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) {
+    function likeArticle(btn, id) {
+      btn.classList.toggle('liked');
+      const icon = btn.querySelector('i');
+      const label = btn.querySelector('span');
+      if (btn.classList.contains('liked')) {
+        icon.className = 'fas fa-heart';
+        label.textContent = 'Liked';
+        showToast('Liked! ');
+      } else {
+        icon.className = 'far fa-heart';
+        label.textContent = 'Like';
+      }
+      fetch('/api/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ article_id: id })
+      }).catch(() => {});
+    }
+
+    // Infinite scroll
+    document.getElementById('newsFeed').addEventListener('scroll', function() {
+      if (this.scrollTop + this.clientHeight >= this.scrollHeight - 200) {
         fetchNews(currentQuery);
       }
     });
 
-    // Load default on startup
-    window.onload = () => fetchNews("technology", true);
+    // Enter key search
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') startNewSearch();
+    });
+
+    // ---- Ad Rotation ----
+    const ads = [
+      { img: 'https://placehold.co/280x120/e82127/ffffff?text=Tesla+Cybertruck+%F0%9F%9A%98', link: 'https://www.tesla.com/cybertruck', label: 'Tesla Cybertruck' },
+      { img: 'https://placehold.co/280x120/1a1a2e/ffffff?text=iPhone+16+Pro+%F0%9F%93%B1', link: 'https://www.apple.com/iphone', label: 'iPhone 16 Pro' },
+      { img: 'https://placehold.co/280x120/0052ff/ffffff?text=GistCaster+gistcaster.com+%F0%9F%8E%99%EF%B8%8F', link: 'https://gistcaster.com', label: 'GistCaster' },
+      { img: 'https://placehold.co/280x120/6c63ff/ffffff?text=OmnificWorks+AI+%E2%9A%A1', link: 'https://omnificworks.com', label: 'OmnificWorks' },
+      { img: 'https://placehold.co/280x120/00d4aa/ffffff?text=Monipoint+%F0%9F%92%B0', link: 'https://monipoint.com', label: 'Monipoint' },
+      { img: 'https://placehold.co/280x120/ff6b6b/ffffff?text=Samsung+Galaxy+S25+%F0%9F%93%B1', link: 'https://www.samsung.com', label: 'Samsung Galaxy S25' },
+      { img: 'https://placehold.co/280x120/845ef7/ffffff?text=OpenAI+ChatGPT+%F0%9F%A4%96', link: 'https://openai.com', label: 'ChatGPT' },
+      { img: 'https://placehold.co/280x120/ffa94d/ffffff?text=Meta+Quest+3+%F0%9F%95%B6%EF%B8%8F', link: 'https://www.meta.com/quest', label: 'Meta Quest 3' },
+    ];
+
+    let adIndex = 0;
+    const AD_INTERVAL = 8;
+    let adRemaining = AD_INTERVAL;
+    let adTick = null;
+
+    const adImg = document.getElementById('adImage');
+    const adLink = document.getElementById('adLink');
+    const adProgress = document.getElementById('adProgress');
+    const adCountdown = document.getElementById('adCountdown');
+
+    function showAd(index) {
+      const ad = ads[index];
+      adImg.style.opacity = '0';
+      setTimeout(() => {
+        adImg.src = ad.img;
+        adImg.alt = ad.label;
+        adLink.href = ad.link;
+        adImg.style.opacity = '1';
+      }, 300);
+      adRemaining = AD_INTERVAL;
+      adProgress.style.width = '100%';
+      adCountdown.textContent = AD_INTERVAL;
+    }
+
+    function tickAd() {
+      adRemaining--;
+      const pct = (adRemaining / AD_INTERVAL) * 100;
+      adProgress.style.width = pct + '%';
+      adCountdown.textContent = adRemaining;
+      if (adRemaining <= 0) {
+        adIndex = (adIndex + 1) % ads.length;
+        showAd(adIndex);
+      }
+    }
+
+    function startAdRotation() {
+      showAd(0);
+      if (adTick) clearInterval(adTick);
+      adTick = setInterval(tickAd, 1000);
+    }
+
+    // Initial load
+    fetchNews('technology', true);
+    startAdRotation();
   </script>
 </body>
 </html>

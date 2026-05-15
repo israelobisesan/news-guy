@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load NewsData API Key from environment
-NEWSDATA_API_KEY = "pub_6fa311d44ab545f289e80f78441c3d7c"
+NEWSDATA_API_KEY = os.getenv("NEWSDATA_API_KEY", "pub_6fa311d44ab545f289e80f78441c3d7c")
 
 @app.route("/")
 def home():
